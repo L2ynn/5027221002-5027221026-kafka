@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  zookeeper:
+    image: zookeeper:latest  
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: bitnami/kafka:latest  
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+
+  python:
+    image: python:latest
+    volumes:
+      - .:/app
+    working_dir: /app
+    depends_on:
+      - kafka
+    entrypoint: ["tail", "-f", "/dev/null"]
